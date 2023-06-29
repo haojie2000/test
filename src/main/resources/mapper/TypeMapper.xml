@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.TypeDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+<!--String selectNameAndPNameById(@Param("typeId") String id);-->
+    <resultMap id="typeResultMap" type="goodsType">
+        <result property="typeId" column="type_id"></result>
+        <result property="typeName" column="type_name"></result>
+        <result property="typePId" column="type_p_id"></result>
+        <result property="typePName" column="type_p_name"></result>
+    </resultMap>
+<!--    List<GoodsType> getByTypeId(String typeId);-->
+    <select id="getByTypeId" resultMap="typeResultMap">
+        select type_id,type_name,t.type_p_id,type_p_name from tb_type t , tb_type_p p where t.type_p_id=p.type_p_id and t.type_id=#{typeId}
+    </select>
+<!--    List<GoodsType> getTypeByTypePId(@Param("typePId") String typePId);-->
+    <select id="getTypeByTypePId" resultMap="typeResultMap">
+        select type_id,type_name from tb_type where type_p_id =#{typePId}
+    </select>
+<!--    String getTypeIdByName(@Param("typeName") String typeName);-->
+    <select id="getTypeIdByName" resultType="string">
+        select type_id from tb_type where type_name=#{typeName}
+    </select>
+</mapper>

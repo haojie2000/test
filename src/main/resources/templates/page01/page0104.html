@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>商品报损</title>
+    <style type="text/css">
+        .demo-table-expand {
+            font-size: 0;
+        }
+
+        .demo-table-expand label {
+            width: 90px;
+            color: #99a9bf;
+        }
+
+        .demo-table-expand .el-form-item {
+            margin-right: 0;
+            margin-bottom: 0;
+            width: 50%;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+
+    <template>
+
+        <el-table
+                :data="tableData"
+                style="width: 100%">
+            <el-table-column type="expand">
+                <template slot-scope="props">
+                    <el-form label-position="left" inline class="demo-table-expand">
+                        <el-form-item label="商品 ID">
+                            <span>{{ props.row.goodsId }}</span>
+                        </el-form-item>
+                        <el-form-item label="商品名称">
+                            <span>{{ props.row.goodsName }}</span>
+                        </el-form-item>
+                        <el-form-item label="厂家名称">
+                            <span>{{ props.row.supplierName }}</span>
+                        </el-form-item>
+                        <el-form-item label="进货数量">
+                            <span>{{ props.row.quantity }}</span>
+                        </el-form-item>
+                        <el-form-item label="进货时间">
+                            <span>{{ props.row.passTime }}</span>
+                        </el-form-item>
+                        <el-form-item label="批准人">
+                            <span>{{ props.row.userName }}</span>
+                        </el-form-item>
+                        <el-form-item label="厂家地址">
+                            <span>{{ props.row.address }}</span>
+                        </el-form-item>
+                    </el-form>
+                </template>
+            </el-table-column>
+            <el-table-column
+                    label="进货订单 ID"
+                    prop="purchaseId">
+            </el-table-column>
+            <el-table-column
+                    label="商品名称"
+                    prop="goodsName">
+            </el-table-column>
+            <el-table-column
+                    label="进货厂家"
+                    prop="supplierName">
+            </el-table-column>
+        </el-table>
+        <div class="pagination-container">
+        <el-pagination
+                class="pagiantion"
+                @current-change="handleCurrentChange"
+                :current-page="pagination.currentPage"
+                :page-size="pagination.pageSize"
+                layout="total, prev, pager, next, jumper"
+                :total="pagination.total">
+        </el-pagination>
+    </div>
+    </template>
+
+</div>
+
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var Main = {
+        created() {
+            this.getAll()
+        },
+        data() {
+            return {
+                pagination: {//分页相关模型数据
+                    currentPage: 1,//当前页码
+                    pageSize: 5,//每页显示的记录数
+                    total: 0,//总记录数
+                    queryString:null//查询条件
+                },
+                tableData: [
+                    // {
+                    //     id: "12987122",
+                    //     name: "好滋好味鸡蛋仔",
+                    //     category: "张经理",
+                    //     desc: "荷兰优质淡奶，奶香浓而不腻",
+                    //     address: "上海市普陀区真北路",
+                    //     shop: "王小虎夫妻店",
+                    //     shopId: "10333"
+                    // }
+                ]
+            };
+        },
+        methods: {
+            // getAll() {
+            //     axios.get('/purchase').then((res) => {
+            //         this.tableData = res.data.data;
+            //         console.log(this.tableData)
+            //     });
+            // },
+            //切换页码
+            handleCurrentChange(currentPage) {
+                this.pagination.currentPage = currentPage;
+                this.getAll();
+            },
+            //分页查询
+            getAll() {
+                console.log(111)
+                //构造分页查询条件，就是一个json对象
+                var param = {
+                    currentPage:this.pagination.currentPage,
+                    pageSize:this.pagination.pageSize,
+                    queryString:this.pagination.queryString
+                };
+                //发送ajax请求
+                axios.post("/purchase",param).then((res) => {
+                    this.tableData = res.data.data;
+                });
+                axios.get("/purchase").then((res)=>{
+                    this.pagination.total = res.data;
+                });
+            },
+        }
+    };
+    var Ctor = Vue.extend(Main);
+    new Ctor().$mount("#app");
+
+</script>
+</html>

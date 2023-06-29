@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>进货审批</title>
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-table
+                :data="tableData" style="width: 100%"
+        >
+            <el-table-column
+                    fixed
+                    prop="purchaseApplicationId"
+                    label="进货申请单"
+                    width="200"
+            >
+            </el-table-column>
+            <el-table-column
+                    prop="goodsId"
+                    label="货物编号"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="goodsName"
+                    label="进货货物"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="quantity"
+                    label="进货数量"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="applicationDate"
+                    label="申请时间"
+                    width="200">
+            </el-table-column>
+            <el-table-column
+                    prop="remark"
+                    label="申请理由"
+                    width="150">
+            </el-table-column>
+            <el-table-column
+                    prop="supplierName"
+                    label="供应商"
+                    width="150">
+            </el-table-column>
+            <el-table-column
+                    prop="userName"
+                    label="申请人"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    fixed="right"
+                    label="操作"
+                    width="120">
+                <template slot-scope="scope">
+                    <el-button
+                            @click="deleteRow(scope.row)"
+                            type="text"
+                            size="small">
+                        批准
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+</div>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script>
+     var vue=new Vue({
+         el: '#app',
+         data: {
+             tableData: [],
+         },
+         created() {
+             this.getAll();
+         },
+         methods: {
+             getAll(){
+                 axios.get('/purchase/application').then( (res)=> {
+                     this.tableData=res.data.data;
+                     console.log(this.tableData)
+                 });
+             },
+             deleteRow(row) {
+                 console.log(row.purchaseApplicationId)
+                 this.$confirm('是否审批该申请, 是否继续?', '提示', {
+                     type: 'warning'
+                 }).then(() => {
+                     //发送ajax请求，提交id到服务端
+                     //2.做删除业务
+                     axios.delete("/purchase/"+row.purchaseApplicationId).then((res)=>{
+                         if(res.data.code == 200){
+                             this.$message.success("批准成功");
+                         }if(res.data.code == 400){
+                             this.$message.error(res.data.message)
+                         }
+                     }).finally(()=>{
+                         this.getAll();
+                     });
+                 }).catch(()=>{
+                     //3.取消删除
+                     this.$message.info("取消批准操作");
+                 });
+             }
+         }
+     })
+
+    // var Ctor = Vue.extend(Main)
+    // new Ctor().$mount('#app')
+</script>
+</html>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.PurchaseApplicationDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+    <resultMap id="purchaseApplicationResult" type="purchaseApplication">
+        <result property="purchaseApplicationId" column="purchase_application_id"></result>
+        <result property="goodsId" column="goods_id"></result>
+        <result property="quantity" column="quantity"></result>
+        <result property="applicationDate" column="application_time"></result>
+        <result property="userId" column="user_id"></result>
+        <result property="supplierId" column="supplier_Id"></result>
+        <result property="goodsName" column="goods_name"></result>
+        <result property="supplierName" column="supplier_name"></result>
+    </resultMap>
+<!-- int save(PurchaseApplication purchaseApplication);
+    int update(int id);
+    List<PurchaseApplication> selectAll();-->
+    <insert id="save">
+        insert into tb_purchase_application value (null,#{purchaseApplicationId},
+        #{goodsId},#{quantity},#{supplierId},#{applicationDate},#{userId},#{state},#{remark}
+        )
+    </insert>
+    <update id="update">
+        update tb_purchase_application set state=1 where purchase_application_id = #{id}
+    </update>
+    <select id="selectAll" resultMap="purchaseApplicationResult">
+        select * from tb_purchase_application where state =0;
+    </select>
+<!--    List<PurchaseApplication> selectStateZone();-->
+    <select id="selectStateOne" resultMap="purchaseApplicationResult">
+        select * from tb_purchase_application where state = 1;
+    </select>
+<!--    PurchaseApplication getById(String id);-->
+    <select id="getById" resultMap="purchaseApplicationResult">
+        select * from tb_purchase_application where purchase_application_id = #{id};
+    </select>
+<!--    String getNameById(@Param("id") String id);-->
+    <select id="getNameById" resultMap="purchaseApplicationResult">
+        select goods_name from tb_purchase_application where goods_id = #{id}
+    </select>
+</mapper>

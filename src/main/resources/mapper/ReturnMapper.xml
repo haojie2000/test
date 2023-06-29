@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.ReturnDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+    <resultMap id="ReturnResultMap" type="Return">
+        <result column="return_id" property="returnId"></result>
+        <result property="userId" column="user_id"></result>
+        <result property="quantity" column="quantity"></result>
+        <result property="supplierId" column="supplier_id"></result>
+        <result property="goodsId" column="goods_id"></result>
+        <result property="goodsName" column="goods_name"></result>
+        <result property="returnTime" column="pass_time"></result>
+    </resultMap>
+<!-- void save(Return date);
+        List<Return> selectAll();
+        Return selectById(Integer id);
+        List<Return> Limit(@Param("page") Integer page,@Param("offset") Integer offset);-->
+    <select id="selectAll" resultMap="ReturnResultMap" >
+        select * from tb_return
+    </select>
+    <insert id="save">
+        insert into tb_return value (null,#{returnId},#{supplierId},#{goodsId},#{goodsName}
+        ,#{quantity},#{returnTime},#{userId})
+    </insert>
+    <select id="selectById" resultMap="ReturnResultMap">
+        select * from tb_return where return_id =#{id};
+    </select>
+<select id="Limit" resultMap="ReturnResultMap">
+    select * from tb_return limit #{offset},#{page}
+</select>
+<!--     int getCount();-->
+    <select id="getCount" resultType="int">
+        select count(*) from tb_return
+    </select>
+<!--    List<Return> getByDate(@Param("date")String date);-->
+    <select id="getByDate" resultMap="ReturnResultMap">
+        select * from tb_return where pass_time like concat(#{date},'%')
+    </select>
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.ReturnApplicationDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+
+    <resultMap id="returnApplicationResultMap" type="returnApplication">
+        <result column="return_application_id" property="returnApplicationId"></result>
+        <result column="purchase_id" property="purchaseId"></result>
+        <result column="user_id" property="userId"></result>
+        <result column="goods_id" property="goodsId"></result>
+        <result column="goods_name" property="goodsName"></result>
+        <result column="supplier_id" property="supplierId"></result>
+        <result column="application_time" property="applicationTime"></result>
+    </resultMap>
+    <!--void selectAll();
+    void selectById();
+    void save(ReturnApplication returnApplication);
+    void update(@Param("returnApplicationId") String id);
+    void selectLimit(@Param("page") Integer page,@Param("offset") Integer offset);-->
+    <select id="selectLimit" resultMap="returnApplicationResultMap">
+        select * from tb_return_application where state=0 limit #{offset},#{page};
+    </select>
+    <select id="selectAll" resultMap="returnApplicationResultMap">
+        select * from tb_return_application where state=0
+    </select>
+    <select id="selectById" resultMap="returnApplicationResultMap">
+        select * from tb_return_application
+                        where return_application_id = #{id} and state=0;
+    </select>
+    <update id="update">
+        update tb_return_application set state=1 where return_application_id = #{returnApplicationId};
+    </update>
+    <insert id="save">
+        insert into tb_return_application value (null,#{returnApplicationId},#{purchaseId},#{goodsId},#{goodsName}
+        ,#{supplierId},#{quantity},#{applicationTime},#{userId},#{state})
+    </insert>
+</mapper>

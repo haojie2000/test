@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.PurchaseDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+    <resultMap id="purchaseResultMap" type="purchase">
+        <result property="purchaseId" column="purchase_id"></result>
+        <result property="goodsId" column="goods_id"></result>
+        <result property="quantity" column="quantity"></result>
+        <result property="passTime" column="pass_time"></result>
+        <result property="userId" column="user_id"></result>
+        <result property="supplierId" column="supplier_id"></result>
+    </resultMap>
+<!--List<Purchase> select();-->
+    <select id="select" resultMap="purchaseResultMap">
+        select * from tb_purchase where state!=2 limit #{offset},#{page}
+    </select>
+    <select id="select2" resultMap="purchaseResultMap">
+        select * from tb_purchase where state=0 limit #{offset},#{page}
+    </select>
+<!--    int insert(Purchase purchase);
+    int updateById(@Param("purchaseId") Integer id);-->
+    <insert id="insert">
+        insert into tb_purchase value(null,#{purchaseId},#{goodsId},#{supplierId},#{quantity},
+        #{passTime},#{userId},#{state});
+    </insert>
+    <update id="updateById">
+        update tb_purchase set state=#{state} where purchase_id = #{purchaseId};
+    </update>
+<!--    int selectAll();-->
+    <select id="selectAll" resultMap="purchaseResultMap">
+        select * from tb_purchase
+    </select>
+<!--    int getCount();-->
+    <select id="getCount" resultType="int">
+        select count(*) from tb_purchase where state!=2;
+    </select>
+    <select id="getCount2" resultType="int">
+        select count(*) from tb_purchase where state=0;
+    </select>
+<!--    List<Purchase> getById(@Param("purchaseId") String id);-->
+    <select id="getById" resultMap="purchaseResultMap">
+        select * from tb_purchase where purchase_id=#{purchaseId} and state!=2;
+     </select>
+<!--    List<Purchase> getByGoodsId(@Param("goodsId")String goodsId);-->
+    <select id="getByGoodsId" resultMap="purchaseResultMap">
+        select * from tb_purchase where state!=2 and goods_id=#{goodsId};
+    </select>
+    <select id="getById2" resultMap="purchaseResultMap">
+        select * from tb_purchase where purchase_id=#{purchaseId} and state=0;
+     </select>
+    <!--    List<Purchase> getByGoodsId(@Param("goodsId")String goodsId);-->
+    <select id="getByGoodsId2" resultMap="purchaseResultMap">
+        select * from tb_purchase where state=0 and goods_id=#{goodsId};
+    </select>
+<!--    List<Purchase> getAllExcel();
+    List<Purchase> getByDateExcel(@Param("date")String date);-->
+    <select id="getByDateExcel" resultMap="purchaseResultMap">
+        select * from tb_purchase where pass_time like concat(#{date},'%')
+    </select>
+</mapper>

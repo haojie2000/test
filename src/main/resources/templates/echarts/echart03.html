@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>其他</title>
+</head>
+<body>
+<div id="app">
+    <div class="block">
+        <el-date-picker
+                v-model="selectedDate"
+                type="month"
+                format="yyyy-MM"
+                :picker-options="pickerOptions"
+                @change="handleDateChange"
+        ></el-date-picker>
+    </div>
+    <div class="col-md-12">
+        <div>
+            <el-row>
+                <el-col :span="12">
+                    <div id="barChart" style="height: 400px;"></div>
+                </el-col>
+                <el-col :span="12">
+                    <div id="barChart2" style="height: 400px;"></div>
+                </el-col>
+            </el-row>
+        </div>
+    </div>
+
+</div>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script src="https://cdn.staticfile.org/echarts/4.3.0/echarts.min.js"></script>
+<script type="text/javascript">
+    var Main = {
+        mounted() {
+            this.init()
+        },
+        data() {
+            return {
+                selectedDate: null,
+                pickerOptions: {
+                    disabledDate(date) {
+                        const currentYear = new Date().getFullYear();
+                        const currentMonth = new Date().getMonth() + 1;
+                        const selectedYear = date.getFullYear();
+                        const selectedMonth = date.getMonth() + 1;
+                        return selectedYear > currentYear || (selectedYear === currentYear && selectedMonth > currentMonth);
+                    },
+                    shortcuts: [
+                        {
+                            text: '本月',
+                            onClick: () => {
+                                const today = new Date();
+                                const year = today.getFullYear();
+                                const month = today.getMonth() + 1;
+                                const date = year + '-' + (month < 10 ? '0' : '') + month;
+                                this.selectedDate = date;
+                            }
+                        },
+                        {
+                            text: '上个月',
+                            onClick: () => {
+                                const today = new Date();
+                                const year = today.getFullYear();
+                                const month = today.getMonth();
+                                const date = year + '-' + (month < 10 ? '0' : '') + month;
+                                this.selectedDate = date;
+                            }
+                        }
+                    ]
+                },
+                options: {
+                    xAxis: {
+                        data: [
+                            // "话梅", "茶", "豆皮", "外星人电解质水", "巧克力", "蟹黄味瓜子"
+                        ]
+                    },
+                    yAxis: {},
+                    series: [{
+                        name: '销量',
+                        type: 'bar',
+                        data: [
+                            // 5, 20, 36, 10, 10, 20
+                        ]
+                    }],
+                },
+                options2: {
+                    series: [{
+                        name: '访问来源',
+                        type: 'pie',    // 设置图表类型为饼图
+                        radius: '55%',  // 饼图的半径，外半径为可视区尺寸（容器高宽中较小一项）的 55% 长度。
+                        data: []
+                    }],
+                },
+                param: {
+                    date: '',
+                    typePId: '1003',
+                    typeName: ''
+                },
+                barChart:'',
+                barChart2:''
+            };
+        },
+        methods: {
+
+            init() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = today.getMonth() + 1;
+                const date = year + '-' + (month < 10 ? '0' : '') + month;
+                this.selectedDate = date;
+                this.fun(this.selectedDate)
+            },
+            fun(date) {
+                if(this.barChart){
+                    this.barChart.dispose();
+                    this.options.series[0].data =[];
+                    this.options.xAxis.data=[];
+                    this.barChart = null;
+                }
+                if(this.barChart2){
+                    this.barChart2.dispose();
+                    // this.options2.series[0].data=[];
+                    this.barChart2 = null;
+                }
+                this.barChart = echarts.init(document.getElementById('barChart'));
+                this.barChart2 = echarts.init(document.getElementById('barChart2'));
+                // const today = new Date();
+                // const year = today.getFullYear();
+                // const month = today.getMonth() + 1;
+                // const date = year + '-' + (month < 10 ? '0' : '') + month;
+                // this.selectedDate = date;
+                this.param.date = date;
+
+                // 使用配置项显示柱状图
+                axios.post("/sale/other/init", this.param).then((res) => {
+                    // if(barChart){
+                    //     barChart.setOption({
+                    //         series: [
+                    //             {
+                    //                 data: []
+                    //             }
+                    //         ]
+                    //     });
+                    // }
+                    if (res.data.code == 200) {
+                        var param = {
+                            typeName: '',
+                            total: ''
+                        };
+                        var data = []
+                        for (const re of res.data.data) {
+                            param = re;
+                            this.options.xAxis.data.push(param.typeName);
+                            data.push(param.total)
+                            this.options.series[0].data = data;
+                        }
+                    } else {
+                        this.$message.error(res.data.message);
+                    }
+                }).finally(() => {
+                    this.barChart.setOption(this.options);
+                    // var barChart2 = echarts.init(document.getElementById('barChart2'));
+                    this.barChart.on('click', (params) => {
+                        // if(barChart2){
+                        //     barChart2.setOption({
+                        //         series: [
+                        //             {
+                        //                 data: []
+                        //             }
+                        //         ]
+                        //     });
+                        // }
+                        console.log(params)
+                        var param = {
+                            typeName: '',
+                            date: ''
+                        };
+                        param.typeName = params.name;
+                        param.date = date;
+                        console.log(param)
+                        axios.post("/sale/other/onclick", param).then((res) => {
+                            var data = []
+                            for (var i = 0; i < res.data.data.length; i++) {
+                                var param = {
+                                    value: '',
+                                    name: ''
+                                };
+                                param.name = res.data.data[i].goodsName;
+                                param.value = res.data.data[i].total;
+                                data.push(param)
+                                console.log(data)
+                            }
+                            console.log(data)
+                            console.log(this.options2)
+                            this.options2.series[0].data = data;
+
+                            this.barChart2.setOption(this.options2);
+                            // barChart2.on('click', function (params) {
+                            //     console.log(params)
+                            //     var typeName=params.name;
+                            //     alert(params.name);
+                            // });
+                        })
+                    });
+                });
+
+            },
+            handleDateChange() {
+                // 获取选择的年份和月份
+                const year = this.selectedDate.getFullYear();
+                const month = this.selectedDate.getMonth() + 1;
+                var date = year + '-' + (month < 10 ? '0' : '') + month;
+                this.fun(date);
+            }
+        }
+    };
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+</html>

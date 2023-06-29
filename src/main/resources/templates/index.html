@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录界面</title>
+    <link rel="stylesheet" href="../static/css/login.css">
+</head>
+
+<body>
+<div class="container">
+    <div class="main_left active">
+        <h2>收银员登录</h2>
+        <form th:action="@{login}" method="POST" class="form_login">
+            <input type="text" name="username" id="username" placeholder="账号">
+            <input type="password" name="password" id="password" placeholder="请输入密码">
+            <button class="btn_login">登录</button>
+        </form>
+    </div>
+    <div class="way">
+        <div class="change_way">
+            <button class="click" onclick="dclick(this)">管理员</button>
+        </div>
+    </div>
+    <div class="main_right active">
+        <h2>管理员登录</h2>
+        <form th:action="@{login}" method="POST" class="form_register">
+            <input type="text" name="username"  placeholder="请输入账号">
+            <input type="password" name="password"  placeholder="请输入密码">
+            <button class="btn_register">登录</button>
+        </form>
+    </div>
+</div>
+<script>
+    var middlePart = document.getElementsByClassName('way')[0];
+    var firstPart = document.getElementsByClassName('main_left')[0];
+    var finalPart = document.getElementsByClassName('main_right')[0];
+
+    function dclick(e) {
+        if (e.textContent == "管理员") {
+            middlePart.classList.add('pull');
+            firstPart.classList.add('hid');
+            finalPart.classList.add('dis');
+            e.textContent = "收银员";
+        } else {
+            e.textContent = "管理员";
+            middlePart.classList.remove('pull');
+            firstPart.classList.remove('hid');
+            finalPart.classList.remove('dis');
+        }
+    }
+</script>
+</body>
+
+</html>

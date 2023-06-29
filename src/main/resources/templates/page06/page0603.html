@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>关于我们</title>
+</head>
+<body>
+<div id="app">
+    <template>
+        <div class="center-container">
+            <div class="card">
+                <el-row>
+                    <el-col :span="24" class="profile-image">
+                        <img src="../../static/img/test05.jpg" alt="Profile Image">
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <h1>John Doe</h1>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <p>Frontend Developer</p>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <p>Email: johndoe@example.com</p>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <p>Phone: +1 123 456 7890</p>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <p>Website: <a href="https://example.com">example.com</a></p>
+                    </el-col>
+                </el-row>
+                <el-row>
+                    <el-col :span="24">
+                        <p>About Me: Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                    </el-col>
+                </el-row>
+            </div>
+        </div>
+
+    </template>
+</div>
+<style>
+    .center-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+    .card {
+        border: 1px solid #ccc;
+        width: 300px;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .profile-image img {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+    }
+
+    .card h1 {
+        margin-top: 10px;
+        font-size: 24px;
+    }
+
+    .card p {
+        margin-top: 5px;
+        font-size: 16px;
+    }
+</style>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var Main = {
+        data() {
+            return {
+                tableData: {
+                    image: "../../static/img/test05.jpg",
+                    name: "图片1",
+                    description: "这是第一张图片",
+                },
+            };
+        },
+        methods: {
+            uploadImage(item) {
+                // 触发上传图片的功能，例如调用上传图片的对话框
+                // 在上传完成后更新item.image的值
+                console.log("上传图片", item);
+            },
+        },
+    }
+    var Ctor = Vue.extend(Main);
+    new Ctor().$mount("#app");
+</script>
+</html>

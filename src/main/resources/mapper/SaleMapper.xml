@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.SaleDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+    <resultMap id="saleResultMap" type="sale">
+    <result property="saleId" column="sale_id"></result>
+    <result property="goodsId" column="goods_id"></result>
+    <result property="goodsName" column="goods_name"></result>
+    <result property="subtotal" column="sum"></result>
+</resultMap>
+    <resultMap id="saleResultMap2" type="sale">
+        <result property="saleId" column="sale_id"></result>
+        <result property="goodsId" column="goods_id"></result>
+        <result property="goodsName" column="goods_name"></result>
+        <result property="profit" column="profit"></result>
+        <result property="date" column="date"></result>
+    </resultMap>
+    <resultMap id="fundResultMap" type="Fund">
+        <result property="saleId" column="sale_id"></result>
+        <result property="total" column="money"></result>
+    </resultMap>
+    <resultMap id="fundResultMap2" type="Fund">
+       <result property="typeName" column="type_name"></result>
+        <result property="goodsName" column="goods_name"></result>
+        <result property="total" column="total"></result>
+    </resultMap>
+<!--int add(Sale sale);-->
+<insert id="add">
+    insert into tb_sale value (null,#{saleId},#{goodsId},#{goodsName},#{quantity},#{price},#{subtotal});
+</insert>
+<!--    int addFund(Fund fund);-->
+<insert id="addFund">
+    insert into tb_fund value (null,#{saleId},#{date},#{total})
+</insert>
+    <!-- List<GoodsType> getByTypePId(@Param("typePId") String typePId);    -->
+    <select id="getByTypePId" resultMap="com.ncu.edu.dao.TypeDao.typeResultMap">
+        select type_id,type_name from tb_type where type_p_id=#{typePId}
+    </select>
+<!--      Fund getFund(@Param("date") String date,@Param("typeId") String typeId); -->
+    <select id="getFund" resultMap="fundResultMap2">
+        select sum(sum) total from tb_sale left join tb_fund
+         on tb_sale.sale_id=tb_fund.sale_id
+         where goods_id in(select goods_id from tb_goods where type_id =#{typeId}) and tb_fund.date like concat(#{date},'%')
+    </select>
+<!--    Fund getGoodsFund(@Param("goodsId")String goodsId,@Param("date") String date);-->
+    <select id="getGoodsFund" resultMap="fundResultMap2">
+        select distinct(goods_name),sum(sum) total from tb_sale left join tb_fund
+         on tb_sale.sale_id=tb_fund.sale_id
+         where goods_id= #{goodsId} and tb_fund.date like concat(#{date},'%')
+    </select>
+<!--    List<Sale> getALLSale();-->
+    <select id="getALLSale" resultMap="saleResultMap2">
+        select
+        tb_sale.*,date,((tb_goods.price-tb_goods.purchase_price)*quantity) profit
+        from tb_fund left  join tb_sale on tb_sale.sale_id=tb_fund.sale_id
+        left join tb_goods on tb_sale.goods_id=tb_goods.goods_id order by tb_fund.sale_id
+    </select>
+<!--    List<Sale> getSaleByDate(@Param("date") String date);-->
+    <select id="getSaleByDate" resultMap="saleResultMap2">
+        select
+        tb_sale.*,date,((tb_goods.price-tb_goods.purchase_price)*quantity) profit
+        from tb_fund left  join tb_sale on tb_sale.sale_id=tb_fund.sale_id
+        left join tb_goods on tb_sale.goods_id=tb_goods.goods_id
+         where date like concat(#{date},'%')
+         order by tb_fund.sale_id
+    </select>
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.SupplierDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+    <resultMap id="supplierResultMap" type="Supplier">
+        <result property="supplierId" column="supplier_id"></result>
+        <result property="supplierName" column="supplier_name"></result>
+        <result property="address" column="address"></result>
+        <result property="tel" column="tel"></result>
+        <result property="picker" column="picker"></result>
+    </resultMap>
+<!--    List<Supplier> selectAll();
+    int update(Supplier supplier);
+    List<Supplier> limit(@Param("page") Integer page,@Param("offset") Integer offset);-->
+    <select id="selectAll" resultType="int">
+        select count(*) from tb_supplier
+    </select>
+    <update id="update">
+        update tb_supplier
+        set supplier_name=#{supplierName}
+        ,address=#{address}
+        ,tel=#{tel}
+        ,picker=#{picker}
+        where supplier_id =#{supplierId}
+    </update>
+    <select id="limit" resultMap="supplierResultMap">
+        select * from tb_supplier limit #{offset},#{page}
+    </select>
+<!--    Supplier selectById(@Param("supplierId") String id);-->
+    <select id="selectById" resultMap="supplierResultMap">
+        select * from tb_supplier where supplier_id=#{supplierId}
+    </select>
+<!--     List<String> getSupplierNamesByGoodsId(String goodsId);-->
+    <select id="getSupplierNamesByGoodsId" resultType="string">
+        select supplier_name from tb_supplier where supplier_id in(select supplier_id from tb_supplier_goods where goods_id=#{goodsId})
+    </select>
+<!--        List<String> getGoodsNameBySupplierId(@Param("supplierId") String supplierId);-->
+    <select id="getGoodsNameBySupplierId" resultType="string">
+        select goods_name from tb_goods where goods_id in (select goods_id from tb_supplier_goods where supplier_id=#{supplierId})
+    </select>
+<!--     int save(Supplier supplier);-->
+    <insert id="save" >
+        insert into tb_supplier value(null,#{supplierId},#{supplierName},#{tel},#{address},#{picker});
+    </insert>
+<!--    int addSupplierGoods(@Param("supplierName") String supplierId,@Param("goodsId") String goodsId);-->
+    <insert id="addSupplierGoods">
+        insert into tb_supplier_goods value (null,#{supplierId},#{goodsId})
+    </insert>
+<!--     int deleteBySupplierId(String supplierId);-->
+    <delete id="deleteBySupplierId">
+        delete from tb_supplier where supplier_id=#{supplierId}
+    </delete>
+<!--    int deleteFromGoods(@Param("supplierId") String supplierId);-->
+    <delete id="deleteFromGoods">
+        delete from tb_supplier_goods where supplier_id=#{supplierId}
+    </delete>
+<!--    List<Supplier> select(@Param("queryString") String queryString);-->
+    <select id="select" resultMap="supplierResultMap">
+        select * from tb_supplier where supplier_id=#{queryString} or supplier_name=#{queryString}
+    </select>
+<!--    int getByName(String supplierName);-->
+    <select id="getByName" resultType="string">
+        select supplier_id from tb_supplier where supplier_name=#{supplierName}
+    </select>
+<!--    int getSupplierGoods(@Param("supplierId") String supplierId,@Param("goodsId") String goodsId);-->
+    <select id="getSupplierGoods" resultType="int">
+        select count(*) from tb_supplier_goods where supplier_id=#{supplierId} and goods_id=#{goodsId}
+    </select>
+</mapper>

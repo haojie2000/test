@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- 页面meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>供应商管理</title>
+    <meta name="description" content="供应商管理">
+    <meta name="keywords" content="供应商管理">
+    <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="../../static/plugins/elementui/index.css">
+    <link rel="stylesheet" href="../../static/plugins/font-awesome/css/font-awesome.min.css">
+    <link rel="stylesheet" href="../../static/css/style.css">
+</head>
+<body class="hold-transition">
+<div id="app">
+    <div class="content-header">
+        <h1>供应商管理</h1>
+    </div>
+    <div class="app-container">
+        <div class="box">
+            <div class="filter-container">
+                <el-input placeholder="供应商编码/供应商名称" v-model="pagination.queryString" style="width: 200px;" class="filter-item"></el-input>
+                <el-button @click="findPage(1)" class="dalfBut">查询</el-button>
+                <el-button type="primary" class="butT" @click="handleCreate()">新建</el-button>
+            </div>
+            <el-table size="small" current-row-key="id" :data="dataList" stripe highlight-current-row>
+                <el-table-column type="index" align="center" label="序号"></el-table-column>
+                <el-table-column prop="supplierId" label="供应商ID" align="center"></el-table-column>
+                <el-table-column prop="supplierName" label="供应商名称" align="center"></el-table-column>
+                <el-table-column prop="address" label="公司地址" align="center"></el-table-column>
+                <el-table-column prop="picker" label="联系人" align="center"></el-table-column>
+                <el-table-column prop="tel" label="联系方式" align="center"></el-table-column>
+                <el-table-column prop="goods" label="公司产品" align="center"></el-table-column>
+                <el-table-column label="操作" align="center">
+                    <template slot-scope="scope">
+                        <el-button type="primary" size="mini" @click="handleUpdate(scope.row)">编辑</el-button>
+                        <el-button size="mini" type="danger" @click="handleDelete(scope.row)">删除</el-button>
+                    </template>
+                </el-table-column>
+            </el-table>
+            <!-- 新增标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="新增检查项" :visible.sync="dialogFormVisible">
+                    <el-form ref="dataAddForm" :model="formData" :rules="rules" label-position="right" label-width="100px">
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="供应商名称" prop="supplierName">
+                                    <el-input v-model="formData.supplierName"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="联系人" prop="picker">
+                                    <el-input v-model="formData.picker"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                        <el-row>
+                            <el-select v-model="value" placeholder="请选择父类型" value-key="value" @change="changeSelect">
+                                <el-option
+                                        v-for="item in options"
+                                        :key="item.value"
+                                        :label="item.label"
+                                        :value="item.value">
+                                </el-option>
+                            </el-select>
+                            <el-select v-model="value2" placeholder="请选择子类型" value-key="value2" @change="changeSelect2">
+                                <el-option
+                                        v-for="item in options2"
+                                        :key="item.value"
+                                        :label="item.typeName"
+                                        :value="item.typeId">
+                                </el-option>
+                            </el-select>
+                            <el-select v-model="formData.goodsId" multiple placeholder="请选择商品" value-key="value3">
+                                <el-option
+                                        v-for="item in options3"
+                                        :key="item.value"
+                                        :label="item.goodsName"
+                                        :value="item.goodsId">
+                                </el-option>
+                            </el-select>
+                        </el-row>
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="公司地址" prop="address">
+                                    <el-input v-model="formData.address"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="联系方式" prop="tel">
+                                    <el-input v-model="formData.tel"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible = false">取消</el-button>
+                        <el-button type="primary" @click="handleAdd()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+
+            <!-- 编辑标签弹层 -->
+            <div class="add-form">
+                <el-dialog title="编辑检查项" :visible.sync="dialogFormVisible4Edit">
+                    <el-form ref="dataEditForm" :model="formData" :rules="rules" label-position="right" label-width="100px">
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="供应商名称" prop="supplierName">
+                                    <el-input v-model="formData.supplierName"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="联系人" prop="picker">
+                                    <el-input v-model="formData.picker"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+<!--                        <el-row>-->
+<!--                            <el-select v-model="value" placeholder="请选择父类型" value-key="value" @change="changeSelect">-->
+<!--                                <el-option-->
+<!--                                        v-for="item in options"-->
+<!--                                        :key="item.value"-->
+<!--                                        :label="item.label"-->
+<!--                                        :value="item.value">-->
+<!--                                </el-option>-->
+<!--                            </el-select>-->
+<!--                            <el-select v-model="value2" placeholder="请选择子类型" value-key="value2" @change="changeSelect2">-->
+<!--                                <el-option-->
+<!--                                        v-for="item in options2"-->
+<!--                                        :key="item.value"-->
+<!--                                        :label="item.typeName"-->
+<!--                                        :value="item.typeId">-->
+<!--                                </el-option>-->
+<!--                            </el-select>-->
+<!--                            <el-select v-model="formData.goodsId" multiple placeholder="请选择商品" value-key="value3">-->
+<!--                                <el-option-->
+<!--                                        v-for="item in options3"-->
+<!--                                        :key="item.value"-->
+<!--                                        :label="item.goodsName"-->
+<!--                                        :value="item.goodsId">-->
+<!--                                </el-option>-->
+<!--                            </el-select>-->
+<!--                        </el-row>-->
+                        <el-row>
+                            <el-col :span="12">
+                                <el-form-item label="公司地址" prop="address">
+                                    <el-input v-model="formData.address"/>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="12">
+                                <el-form-item label="联系方式" prop="tel">
+                                    <el-input v-model="formData.tel"/>
+                                </el-form-item>
+                            </el-col>
+                        </el-row>
+                    </el-form>
+                    <div slot="footer" class="dialog-footer">
+                        <el-button @click="dialogFormVisible4Edit = false">取消</el-button>
+                        <el-button type="primary" @click="handleEdit()">确定</el-button>
+                    </div>
+                </el-dialog>
+            </div>
+        </div>
+    </div>
+    <div class="pagination-container">
+        <el-pagination
+                class="pagiantion"
+                @current-change="handleCurrentChange"
+                :current-page="pagination.currentPage"
+                :page-size="pagination.pageSize"
+                layout="total, prev, pager, next, jumper"
+                :total="pagination.total">
+        </el-pagination>
+    </div>
+</div>
+</body>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data:{
+            pagination: {//分页相关模型数据
+                currentPage: 1,//当前页码
+                pageSize:5,//每页显示的记录数
+                total:0,//总记录数
+                queryString:null//查询条件
+            },
+            dataList: [],//当前页要展示的分页列表数据
+            formData: {},//表单数据
+            dialogFormVisible: false,//增加表单是否可见
+            dialogFormVisible4Edit:false,//编辑表单是否可见
+            rules: {//校验规则
+                code: [{ required: true, message: '项目编码为必填项', trigger: 'blur' }],
+                name: [{ required: true, message: '项目名称为必填项', trigger: 'blur' }]
+            },
+            options: [
+                {
+                    value:'1001',
+                    label:'生鲜部'
+                },{
+                    value:'1002',
+                    label:'食品部'
+                },{
+                    value:'1003',
+                    label:'非食品部'
+                },{
+                    value:'1004',
+                    label:'其他'
+                }
+            ],
+            options2: [],
+            options3: [],
+            value: '',
+            value2: '',
+            value3: [],
+        },
+        //钩子函数，VUE对象初始化完成后自动执行
+        created() {
+            this.findPage();
+        },
+        methods: {
+            //父分类
+            changeSelect(val){
+                console.log(val);
+                axios.get("/message/supplier/select/"+val).then((res)=>{
+                    this.options2=res.data.data;
+                });
+
+            },
+            //子分类
+            changeSelect2(val){
+                console.log("子分类id"+val)
+                axios.get("/message/supplier/select2/"+val).then((res)=>{
+                    this.options3=res.data.data;
+                });
+
+            },
+            //编辑
+            handleEdit() {
+                console.log(this.formData);
+                axios.post("/message/supplier/update",this.formData).then((res)=>{
+                    if(res.data.code==200){
+                        this.$message.success(res.data.message)
+                    }if(res.data.code==444) {
+                        this.$message.error(res.data.message)
+                    }
+                }).finally(()=>{
+                    this.dialogFormVisible4Edit = false;
+                    this.resetForm();
+                });
+            },
+            //添加
+            handleAdd () {
+               console.log(this.formData);
+
+               axios.post("/message/supplier/add",this.formData).then((res)=>{
+
+                   if(res.data.code==200){
+                       this.$message({
+                           type:'success',
+                           message:res.data.message
+                       });
+                   }else {
+                       this.$message({
+                           type:'error',
+                           message:res.data.message
+                       });
+                   }
+
+               }).finally(()=>{
+                   this.dialogFormVisible = false;
+                   this.findPage();
+                   this.resetForm();
+               });
+            },
+
+            //分页查询
+            findPage() {
+                //构造分页查询条件，就是一个json对象
+                var param = {
+                    currentPage:this.pagination.currentPage,
+                    pageSize:this.pagination.pageSize,
+                    queryString:this.pagination.queryString
+                };
+                //发送ajax请求
+                axios.post("/message/supplier",param).then((res) => {
+                    this.dataList = res.data.data;
+                    console.log(this.dataList);
+                    if(res.data.code==444){
+                        this.$message.error(res.data.message)
+                    }
+                });
+                axios.get("/message/supplier").then((res)=>{
+                    this.pagination.total = res.data.data;
+                });
+            },
+            // 重置表单
+            resetForm() {
+                //清空输入框
+                this.formData = {};
+            },
+            // 弹出添加窗口
+            handleCreate() {
+                this.dialogFormVisible = true;
+                this.resetForm();
+            },
+            // 弹出编辑窗口
+            handleUpdate(row) {
+                this.dialogFormVisible4Edit = true;
+                this.formData = row;
+                console.log(this.formData)
+
+            },
+            //切换页码
+            handleCurrentChange(currentPage) {
+                this.pagination.currentPage = currentPage;
+                this.findPage();
+            },
+            // 删除
+            handleDelete(row) {
+                this.$confirm('此操作将永久删除该数据, 是否继续?', '提示', {
+                    type: 'warning'
+                }).then(() => {
+                    console.log(row)
+                    //发送ajax请求，提交id到服务端
+                    axios.get("/message/supplier/" + row.supplierId).then((res) => {
+                        if(res.data.code==200){
+                            //删除成功
+                            this.$message({
+                                type:'success',
+                                message:res.data.message
+                            });
+                        }else{
+                            //删除失败
+                            this.$message.error(res.data.message);
+                        }
+                    }).catch((r) => {
+                        if(r == 'Error: Request failed with status code 403'){
+                            //权限不足
+                            this.$message.error('无访问权限');
+                            return;
+                        }else{
+                            this.$message.error('未知错误');
+                            return;
+                        }
+                    }).finally(() => {
+                        this.findPage();
+                    });
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: '已取消删除'
+                    });
+                });
+            }
+        }
+    })
+</script>
+</html>

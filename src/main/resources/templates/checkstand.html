@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>超市收银系统</title>
+    <meta charset="utf-8">
+</head>
+<body>
+<h1>欢迎使用超市收银系统</h1>
+<form>
+    <label for="product">商品：</label>
+    <input type="text" id="product" name="product"><br><br>
+    <label for="price">价格：</label>
+    <input type="number" id="price" name="price"><br><br>
+    <label for="quantity">数量：</label>
+    <input type="number" id="quantity" name="quantity"><br><br>
+    <button type="button" onclick="addItem()">添加商品</button>
+</form>
+<hr>
+<h2>购物清单</h2>
+<table id="cart">
+    <tr>
+        <th>商品</th>
+        <th>价格</th>
+        <th>数量</th>
+        <th>小计</th>
+    </tr>
+</table>
+<hr>
+<h2>结算</h2>
+<p>总价：<span id="totalPrice">0</span>元</p>
+<button type="button" onclick="checkout()">结算</button>
+<script src="script.js"></script>
+</body>
+<script type="text/javascript">
+    let cart = [];
+
+    function addItem() {
+        const product = document.getElementById("product").value;
+        const price = document.getElementById("price").value;
+        const quantity = document.getElementById("quantity").value;
+
+        if (product !== "" && price !== "" && quantity !== "") {
+            const subtotal = price * quantity;
+            const item = {product, price, quantity, subtotal};
+            cart.push(item);
+
+            const table = document.getElementById("cart");
+            const row = table.insertRow();
+            const cell1 = row.insertCell();
+            const cell2 = row.insertCell();
+            const cell3 = row.insertCell();
+            const cell4 = row.insertCell();
+            cell1.innerHTML = item.product;
+            cell2.innerHTML = item.price;
+            cell3.innerHTML = item.quantity;
+            cell4.innerHTML = item.subtotal;
+
+            updateTotalPrice();
+
+            document.getElementById("product").value = "";
+            document.getElementById("price").value = "";
+            document.getElementById("quantity").value = "";
+        }
+    }
+
+    function updateTotalPrice() {
+        let totalPrice = 0;
+        for (const item of cart) {
+            totalPrice += item.subtotal;
+        }
+        document.getElementById("totalPrice").innerHTML = totalPrice;
+    }
+
+    function checkout() {
+        if (cart.length > 0) {
+            const totalPrice = document.getElementById("totalPrice").innerHTML;
+            alert("您需要支付：" + totalPrice + "元");
+            cart = [];
+            const table = document.getElementById("cart");
+            while (table.rows.length > 1) {
+                table.deleteRow(1);
+            }
+            document.getElementById("totalPrice").innerHTML = 0;
+        }
+    }
+
+</script>
+</html>

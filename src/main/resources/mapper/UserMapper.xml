@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.UserDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+    <resultMap id="userResultMap" type="user">
+        <result column="user_id" property="userId"></result>
+        <result column="user_name" property="userName"></result>
+        <result column="password" property="password"></result>
+        <result column="true_name" property="trueName"></result>
+        <result column="address" property="address"></result>
+        <result column="role_id" property="roleId"></result>
+        <result column="role_name" property="roleName"></result>
+    </resultMap>
+<!--    String login(@Param("username") String username, @Param("password") String password);-->
+    <select id="login" resultType="String">
+        select user_id from tb_user where user_name = #{username} and password = #{password}
+    </select>
+<!--String select(User user);-->
+
+<select id="selectById" resultMap="userResultMap">
+    select * from tb_user where user_id = #{userId};
+</select>
+<!--  List<User> getAll(@Param("offset") Integer offset,@Param("size") Integer size);  -->
+    <select id="getAll" resultMap="userResultMap">
+        select tb_user.*,tb_role.role_name
+        from tb_user,tb_role
+        where tb_user.role_id=tb_role.role_id
+        limit #{offset},#{size}
+    </select>
+<!--    List<User> getByCondition(@Param("con") String con);-->
+    <select id="getByCondition" resultMap="userResultMap">
+        select tb_user.*,tb_role.role_name
+        from tb_user left join tb_role
+        on tb_user.role_id=tb_role.role_id
+        where
+        user_id=#{con} or user_name=#{con}
+    </select>
+<!--    int getCount();-->
+    <select id="getCount" resultType="int">
+        select COUNT(*) from tb_user
+    </select>
+<!--     int add(User user);-->
+    <insert id="add">
+        insert into tb_user value (null,#{userId},#{userName},#{password},#{trueName},#{address},#{roleId})
+    </insert>
+<!--    int update(User user);-->
+    <update id="update">
+        update tb_user
+        set
+            user_name=#{userName},
+            true_name=#{trueName},
+            address=#{address},
+            role_id=#{roleId},
+            password=#{password}
+        where user_id =#{userId}
+    </update>
+<!--    int selectByUserName(String userName);-->
+    <select id="selectByUserName" resultType="int">
+        select count(*) from tb_user where user_name=#{userName} ;
+    </select>
+<!--    int delete(@Param("userId") String userId);-->
+    <delete id="delete">
+        delete from tb_user where user_id=#{userId}
+    </delete>
+<!--     int changePassword(@Param("userId") String userId,@Param("newPass") String newPass);-->
+    <update id="changePassword">
+        update tb_user set password=#{newPass} where user_id=#{userId} and password=#{oldPass}
+    </update>
+</mapper>

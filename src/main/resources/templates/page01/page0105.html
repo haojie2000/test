@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>当前库存查询</title>
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%">
+            <el-table-column
+                    label="商品编号"
+                    prop="goodsId">
+            </el-table-column>
+            <el-table-column
+                    label="商品总分类"
+                    prop="typePName">
+            </el-table-column>
+            <el-table-column
+                    label="商品子分类"
+                    prop="typeName">
+            </el-table-column>
+            <el-table-column
+                    label="商品名称"
+                    prop="goodsName">
+            </el-table-column>
+            <el-table-column
+                    label="库存"
+                    prop="stock">
+            </el-table-column>
+            <el-table-column
+                    label="厂家"
+                    prop="suppliers">
+            </el-table-column>
+            <el-table-column
+                    align="right">
+                <template slot="header" slot-scope="scope">
+                    <el-input
+                            v-model="search"
+                            size="mini"
+                            @blur="searchByName()"
+                            placeholder="输入商品搜索"/>
+                </template>
+            </el-table-column>
+        </el-table>
+        <div class="pagination-container">
+            <el-pagination
+                    class="pagiantion"
+                    @current-change="handleCurrentChange"
+                    :current-page="pagination.currentPage"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total">
+            </el-pagination>
+        </div>
+    </template>
+<!--    <div class="block">-->
+<!--        <el-pagination-->
+<!--                layout="prev, pager, next"-->
+<!--                :total="1000">-->
+<!--        </el-pagination>-->
+<!--    </div>-->
+</div>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var Main = {
+        created(){
+          this.getAll();
+        },
+        data() {
+            return {
+                pagination: {//分页相关模型数据
+                    currentPage: 1,//当前页码
+                    pageSize: 5,//每页显示的记录数
+                    total: 0,//总记录数
+                    queryString:null//查询条件
+                },
+                tableData: [
+                //     {
+                //     goodsId: '2016-05-02',
+                //     typeP: '生鲜',
+                //     type: '鱼类',
+                //     name: '王小虎',
+                //     number: '1995',
+                //     address: '上海市普陀区金沙江路 1518 弄'
+                // }
+                ],
+                search: ''
+            }
+        },
+        methods: {
+            //切换页码
+            handleCurrentChange(currentPage) {
+                this.pagination.currentPage = currentPage;
+                this.getAll();
+            },
+            //分页查询
+            getAll() {
+                //构造分页查询条件，就是一个json对象
+                var param = {
+                    currentPage:this.pagination.currentPage,
+                    pageSize:this.pagination.pageSize,
+                    queryString:this.pagination.queryString
+                };
+                //发送ajax请求
+                axios.post("/goods/stock",param).then((res) => {
+                    this.tableData = res.data.data;
+                    console.log(this.tableData)
+                });
+                axios.get("/goods/count").then((res)=>{
+                    this.pagination.total = res.data;
+                });
+            },
+            searchByName(){
+                if(this.search!=""){
+                    axios.get("/goods/search/"+this.search).then((res)=>{
+                        alert(this.search)
+                        this.tableData = res.data.data;
+                        console.log(this.tableData)
+                    })
+                }else {
+                    this.getAll();
+                }
+
+            },
+        },
+    }
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+</html>

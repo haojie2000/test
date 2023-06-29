@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>超市收银系统</title>
+</head>
+<body>
+<div id="app">
+    <h1>欢迎使用超市收银系统</h1>
+    <el-form :model="form" label-width="80px">
+        <el-form-item label="商品编号">
+            <el-input v-model="form.goodsId" @blur="select"></el-input>
+        </el-form-item>
+        <el-form-item label="单价">
+            <el-input-number v-model="form.price" :precision="2"></el-input-number>
+        </el-form-item>
+        <el-form-item label="数量">
+            <el-input-number v-model="form.quantity"></el-input-number>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="addItem">添加商品</el-button>
+        </el-form-item>
+    </el-form>
+    <hr>
+    <h2>购物清单</h2>
+    <el-table :data="cart">
+        <el-table-column type="index" label="序号"></el-table-column>
+        <el-table-column prop="goodsId" label="商品编号"></el-table-column>
+        <el-table-column prop="goodsName" label="商品名称"></el-table-column>
+        <el-table-column prop="price" label="单价"></el-table-column>
+        <el-table-column prop="quantity" label="数量">
+            <template slot-scope="scope">
+                <el-input-number v-model="scope.row.quantity" @change="change(scope.row)"></el-input-number>
+            </template>
+        </el-table-column>
+        <el-table-column prop="subtotal" label="小计"></el-table-column>
+    </el-table>
+    <hr>
+    <h2>结算</h2>
+    <p>总价：<el-tag>{{total}}</el-tag>元</p>
+    <el-button type="primary" @click="checkout">结算</el-button>
+</div>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    new Vue({
+        el: '#app',
+        data: {
+            form: {
+                goodsId: '',
+                goodsName: '',
+                price: 0,
+                quantity: 0,
+            },
+            cart: [],
+            total: 0.00,
+            fund: {
+                saleId: '',
+                date: '',
+                total: ''
+            }
+        },
+        computed: {
+            totalPrice() {
+                this.total=0.00;
+                for (const item of this.cart) {
+                    this.total += parseFloat(item.subtotal);
+                }
+                return total.toFixed(2);
+            },
+        },
+        methods: {
+            select(){
+                var goodsId=this.form.goodsId;
+                axios.get("/checkStand/search/"+goodsId).then((res)=>{
+                    this.form=res.data.data;
+                })
+            },
+            change(row){
+                console.log(row)
+                row.subtotal=(row.price * row.quantity).toFixed(2);
+                this.total=this.totalPrice();
+            },
+            addItem() {
+                const {goodsId, goodsName, price, quantity} = this.form;
+                if (goodsId !== ''&& goodsName !== ''  && price > 0 && quantity > 0) {
+                    const subtotal = (price * quantity).toFixed(2);
+                    this.cart.push({goodsId, goodsName, price, quantity, subtotal});
+
+                    this.form.goodsId = '';
+                    this.form.goodsName='';
+                    this.form.price = 0;
+                    this.form.quantity = 0;
+                }
+                this.total=this.totalPrice();
+            },
+            checkout() {
+                const totalPrice = this.total;
+                if (totalPrice > 0) {
+
+                    this.$alert(`您需要支付${totalPrice}元`, '结算', {
+                        confirmButtonText: '确定',
+                        callback: () => {
+                            console.log(this.cart);
+                            axios.post("/checkStand/checkOut",this.cart).then((res)=>{
+                                console.log(res.data);
+                                this.fund.saleId=res.data.data;
+                                this.fund.total=this.total;
+                                return axios.post("/checkStand/add",this.fund)
+                            }).then((res)=>{
+                                console.log(res);
+                            });
+
+                            // axios.post("/checkStand/add",this.fund).then((res)=>{
+                            //     console.log(res);
+                            // });
+                            this.cart = [];
+                            this.total=0.00;
+                        },
+                    });
+                }
+            },
+        },
+    });
+
+
+</script>
+</html>

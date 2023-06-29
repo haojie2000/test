@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--接口和映射文件相对应-->
+<mapper namespace="com.ncu.edu.dao.GoodsDao">
+    <!--主要写sql语句,一个方法对应一个sql语句-->
+    <!--
+        mapper接口和映射文件要保持两个一致
+        1.mapper接口的全类名和映射文件的namespace一致
+        2.mapper接口中的方法名要和映射文件的sql的id保持一致
+    -->
+    <resultMap id="goodsResultMap" type="Goods">
+        <result property="goodsId" column="goods_id"></result>
+        <result property="goodsName" column="goods_name"></result>
+        <result property="purchasePrice" column="purchase_price"></result>
+        <result property="price" column="price"></result>
+        <result property="typeId" column="type_id"></result>
+        <result property="stock" column="stock"></result>
+        <result property="typeName" column="type_name"></result>
+    </resultMap>
+<!--List<Goods> selectAll();
+    List<Goods> selectById(@Param("goodsId") Integer goodsId);
+    List<Goods> selectLimit(@Param("page") Integer page,Integer offset);-->
+    <select id="selectAll" resultMap="goodsResultMap">
+        select * from tb_goods;
+     </select>
+    <select id="selectById" resultMap="goodsResultMap">
+        select * from tb_goods where goods_id = #{goodsId};
+    </select>
+<!--    List<Goods> selectByName(@Param("goodsName") String name);-->
+    <select id="selectByName" resultMap="goodsResultMap">
+        select * from tb_goods where goods_name like concat('%',#{goodsName},'%');
+    </select>
+    <select id="selectLimit" resultMap="goodsResultMap">
+        select * from tb_goods limit #{offset},#{page};
+    </select>
+<!--        String selectSupplierByGoodsId(@Param("goodsId") String goodsId);-->
+    <select id="selectSupplierByGoodsId" resultMap="com.ncu.edu.dao.SupplierDao.supplierResultMap">
+        select supplier_id,supplier_name from tb_supplier where supplier_id in (select supplier_id from tb_supplier_goods where goods_id=#{goodsId})
+    </select>
+<!--int addStock(@Param("num") Integer num);
+    int deleteStock(@Param("num")Integer num);-->
+    <update id="addStock">
+        update tb_goods set stock= (stock + #{num}) where goods_id =#{goodsId};
+    </update>
+    <update id="deleteStock">
+        update tb_goods set stock= (stock- #{num}) where goods_id =#{goodsId};
+    </update>
+<!--    int getCount();-->
+    <select id="getCount" resultType="int">
+        select count(*) from tb_goods
+    </select>
+<!--    List<Goods> selectByTypePId(@Param("typePId") String typePId);-->
+    <select id="selectByTypePId" resultMap="goodsResultMap">
+        select goods_id,goods_name,goods.type_id,type_name,stock,price,purchase_price
+         from tb_goods goods, (select type_id,type_name  from tb_type where type_p_id=#{typePId}) type
+         where goods.type_id=type.type_id
+         limit #{offset},#{page} ;
+    </select>
+<!--    Integer getCountByTypePId(@Param("typePId") String typePId);-->
+    <select id="getCountByTypePId" resultType="int">
+        select count(goods_id) from tb_goods where type_id in(select type_id from tb_type where type_p_id = #{typePId})
+    </select>
+<!--    List<Goods> getByCondition(@Param("typePId") String typePId,@Param("search") String search);-->
+    <select id="getByCondition" resultMap="goodsResultMap">
+        select goods_id,goods_name,goods.type_id,type_name,stock,price,purchase_price
+         from tb_goods goods join (select type_id,type_name  from tb_type where type_p_id=#{typePId}) type
+         on goods.type_id=type.type_id
+         where goods_id=#{search} or goods_name like concat('%',#{search},'%')
+    </select>
+<!--    List<Goods> getGoodsByTypeId(@Param("typeId")String typeId);-->
+    <select id="getGoodsByTypeId" resultMap="goodsResultMap">
+        select goods_id,goods_name from tb_goods where type_id = #{typeId}
+    </select>
+<!--    int add(Goods goods);-->
+    <insert id="add">
+        insert into tb_goods value (null,#{goodsId},#{goodsName},#{purchasePrice},#{price},#{typeId},0)
+    </insert>
+<!--    int update(Goods goods);-->
+    <update id="update">
+        update tb_goods
+        set
+        goods_name=#{goodsName},
+        purchase_price=#{purchasePrice},
+        price=#{price},
+        type_id=#{typeId}
+        where goods_id=#{goodsId}
+    </update>
+<!--    int delete(String goodsId);-->
+    <delete id="delete">
+        delete from tb_goods where goods_id=#{goodsId}
+    </delete>
+<!--        List<Goods> getBy(@Param("queryString") String queryString);-->
+    <select id="getBy" resultMap="goodsResultMap">
+        select * from tb_goods where goods_id=#{queryString}or goods_name like concat('%',#{queryString},'%');
+    </select>
+</mapper>

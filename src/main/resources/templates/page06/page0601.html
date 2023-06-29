@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>销售报表</title>
+</head>
+<body>
+<div id="app">
+    <div align="center">
+        <el-row>
+            <el-button type="primary" @click="button1" round>销售情况</el-button>
+            <el-button type="primary" @click="button2" round>本月情况</el-button>
+        </el-row>
+        <br><br>
+        <el-row>
+            <el-button type="primary" @click="button3" round>进货信息</el-button>
+            <el-button type="primary" @click="button4" round>本月情况</el-button>
+        </el-row>
+        <br><br>
+        <el-row>
+            <el-button type="primary" @click="button5" round>退货信息</el-button>
+            <el-button type="primary" @click="button6" round>本月情况</el-button>
+        </el-row>
+    </div>
+
+</div>
+</body>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var vue = new Vue({
+        el: '#app',
+        data:{
+            nowDate:''
+        },
+        created(){
+          this.getDate();
+        },
+        methods: {
+            button1(){
+                axios.get("/sale/out").then((res)=>{
+                    if(res.data.code==200){
+                        this.$message.success(res.data.message)
+                    }else {
+                        this.$message.error(res.data.message)
+                    }
+                })
+            },
+            button2(){
+                axios.get("/sale/out/"+this.nowDate).then((res)=>{
+                    if(res.data.code==200){
+                        this.$message.success(res.data.message)
+                    }else {
+                        this.$message.error(res.data.message)
+                    }
+                })
+            },
+            button3(){
+                axios.get("/purchase/out").then((res)=>{
+                    if(res.data.code==200){
+                        this.$message.success(res.data.message)
+                    }else {
+                        this.$message.error(res.data.message)
+                    }
+                })
+            },
+            button4(){
+                axios.get("/purchase/out/"+this.nowDate).then((res)=>{
+                    if(res.data.code==200){
+                        this.$message.success(res.data.message)
+                    }else {
+                        this.$message.error(res.data.message)
+                    }
+                })
+            },
+            button5(){
+                axios.get("/return/out").then((res)=>{
+                    if(res.data.code==200){
+                        this.$message.success(res.data.message)
+                    }else {
+                        this.$message.error(res.data.message)
+                    }
+                })
+            },
+            button6(){
+                axios.get("/return/out/"+this.nowDate).then((res)=>{
+                    if(res.data.code==200){
+                        this.$message.success(res.data.message)
+                    }else {
+                        this.$message.error(res.data.message)
+                    }
+                })
+            },
+            getDate(){
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = today.getMonth() + 1;
+                const date = year + '-' + (month < 10 ? '0' : '') + month;
+                this.nowDate = date;
+            }
+        }
+    })
+</script>
+</html>

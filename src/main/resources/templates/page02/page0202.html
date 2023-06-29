@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>退货出库</title>
+</head>
+<body>
+<div id="app">
+    <template>
+        <el-table
+                :data="tableData"
+                style="width: 100%"
+        >
+            <el-table-column
+                    fixed
+                    prop="returnApplicationId"
+                    label="退货申请单"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="goodsId"
+                    label="货物编号"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="goodsName"
+                    label="退货货物"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="quantity"
+                    label="退货数量"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="supplierName"
+                    label="供应商"
+                    width="200">
+            </el-table-column>
+            <el-table-column
+                    prop="userName"
+                    label="申请人"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    fixed="right"
+                    label="操作"
+                    width="120">
+                <template slot-scope="scope">
+                    <el-button
+                            @click="deleteRow(scope.row)"
+                            type="text"
+                            size="small">
+                        批准
+                    </el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </template>
+</div>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var Main = {
+        methods: {
+            getAll(){
+                axios.get('/return').then( (res)=> {
+                    this.tableData=res.data.data;
+                    console.log(this.tableData)
+                });
+            },
+            deleteRow(row) {
+                console.log(row.returnApplicationId)
+                this.$confirm('是否审批该申请, 是否继续?', '提示', {
+                    type: 'warning'
+                }).then(() => {
+                    //发送ajax请求，提交id到服务端
+                    //2.做删除业务
+                    axios.delete("/return/"+row.returnApplicationId).then((res)=>{
+                        if(res.data.code == 200){
+                            this.$message.success("批准成功");
+                        }if(res.data.code == 400){
+                            this.$message.error(res.data.message)
+                        }
+                    }).finally(()=>{
+                        this.getAll();
+                    });
+                }).catch(()=>{
+                    //3.取消删除
+                    this.$message.info("取消批准操作");
+                });
+            }
+        },
+        created(){
+            this.getAll();
+        },
+        data() {
+            return {
+                tableData: [
+                //     {
+                //     purchaseId: '158634asd4',
+                //     goodsId:'1001010005',
+                //     goodsName: '可口可乐',
+                //     quantity: '99859',
+                //     supplier: '江西太古可口可乐饮料有限公司',
+                //     userName: '张三'
+                // }
+                ]
+            }
+        }
+    }
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+</html>

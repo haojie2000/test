@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>进货申请</title>
+</head>
+<body>
+<div id="app">
+    <el-form :model="ruleForm" :rules="rules" ref="ruleForm" label-width="100px" class="demo-ruleForm">
+        <el-form-item label="商品编号" prop="name">
+            <el-input v-model="ruleForm.name" @blur="getSupplier($event)" value=""></el-input>
+        </el-form-item>
+        <el-form-item label="供货厂家" prop="region">
+            <el-select v-model="ruleForm.region" placeholder="请选择供货厂家">
+                <el-option v-for="item in ruleForm.options"
+                           :key="item.value"
+                           :label="item.label"
+                           :value="item.value"></el-option>
+            </el-select>
+        </el-form-item>
+        </el-form-item>
+        <template>
+            <el-form-item label="进货数量">
+                <el-input-number v-model="ruleForm.num" controls-position="right" @change="handleChange" :min="1"
+                                 :max="10000"></el-input-number>
+            </el-form-item>
+        </template>
+        <el-form-item label="申请原因" prop="desc">
+            <el-input type="textarea" v-model="ruleForm.desc"></el-input>
+        </el-form-item>
+        <el-form-item>
+            <el-button type="primary" @click="submitForm('ruleForm')">立即申请</el-button>
+            <el-button @click="resetForm('ruleForm')">重置</el-button>
+        </el-form-item>
+    </el-form>
+</div>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var Main = {
+        data() {
+            return {
+                ruleForm: {
+                    name: '',
+                    region: '',
+                    delivery: false,
+                    options: [],
+                    num: 1,
+                    desc: ''
+                },
+
+                rules: {
+                    name: [
+                        {required: true, message: '请输入商品名称', trigger: 'blur'},
+                        {min: 3, max: 20, message: '长度在 3 到 20 个字符', trigger: 'blur'}
+                    ],
+                    region: [
+                        {required: true, message: '请选择供货厂家', trigger: 'change'}
+                    ],
+                    desc: [
+                        {required: true, message: '请填写活动形式', trigger: 'blur'}
+                    ]
+                }
+            };
+        },
+
+        methods: {
+            submitForm(formName) {
+                console.log(this.ruleForm);
+                let data={"goodsId":this.ruleForm.name,"supplierId":this.ruleForm.region
+                ,"remark":this.ruleForm.desc,"quantity":this.ruleForm.num};
+                console.log(data)
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        axios.post("/purchase/application",data).then((res)=>{
+                            let code=res.data.code;
+                            if(code==200){
+                                alert("申请成功")
+                                this.resetForm(formName);
+                            }else {
+                                alert("网络故障，稍后再试")
+                            }
+                        })
+                    } else {
+                        console.log('error submit!!');
+                        return false;
+                    }
+                });
+            },
+            getChange: function (i, item) {
+
+            },
+            getSupplier: function (e) {
+                let goodsId = e.target.value;
+                axios.post("/purchase/application/supplier/", {goodsId: goodsId}).then((res) => {
+                    let list=res.data.data;
+                    for (let i=0;i<list.length;i++){
+                        let p={
+                            label:'',
+                            value:''
+                        }
+                        p.label=list[i].supplierName;
+                        p.value=list[i].supplierId;
+                        this.ruleForm.options.push(p)
+                    }
+                    }
+                )
+        },
+
+        resetForm(formName) {
+            this.$refs[formName].resetFields();
+            this.ruleForm.options=[];
+            this.ruleForm.num=1;
+        },
+        handleChange(value) {
+            console.log(value);
+        }
+    }
+    }
+
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+</html>

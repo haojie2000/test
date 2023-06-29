@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>退货申请</title>
+</head>
+<body>
+<div id="app">
+
+    <template>
+        <div>
+            <el-input
+                    v-model="search"
+                    size="mini"
+                    @blur="searchByName()"
+                    placeholder="输入信息进行查找"/>
+        </div>
+        <el-table
+                :data="tableData"
+                border
+                height="300"
+                style="width: 100%">
+            <el-table-column
+                    fixed
+                    prop="purchaseId"
+                    label="进货单号"
+                    width="180">
+            </el-table-column>
+            <el-table-column
+                    prop="goodsId"
+                    label="商品 ID"
+                    width="120">
+            </el-table-column>
+            <el-table-column
+                    prop="goodsName"
+                    label="商品名称"
+                    width="150">
+            </el-table-column>
+            <el-table-column
+                    prop="supplierName"
+                    label="供应商"
+                    width="200">
+            </el-table-column>
+            <el-table-column
+                    prop="quantity"
+                    label="进货数量"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    prop="userName"
+                    label="批准人"
+                    width="80">
+            </el-table-column>
+            <el-table-column
+                    fixed="right"
+                    label="操作"
+                    width="100">
+                <template slot-scope="scope">
+                    <el-button @click="visiable(scope.row)" type="text" size="small">退货</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+        <div class="pagination-container">
+            <el-pagination
+                    class="pagiantion"
+                    @current-change="handleCurrentChange"
+                    :current-page="pagination.currentPage"
+                    :page-size="pagination.pageSize"
+                    layout="total, prev, pager, next, jumper"
+                    :total="pagination.total">
+            </el-pagination>
+        </div>
+    </template>
+
+    <el-dialog title="收货地址" :visible.sync="dialogFormVisible">
+        <el-form :model="form">
+            <el-form-item label="商品编号" :label-width="formLabelWidth">
+                <el-input v-model="form.goodsId" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="商品名称" :label-width="formLabelWidth">
+                <el-input v-model="form.goodsName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="供应商名称" :label-width="formLabelWidth">
+                <el-input v-model="form.supplierName" autocomplete="off"></el-input>
+            </el-form-item>
+            <el-form-item label="退货数量" :label-width="formLabelWidth">
+                <el-input-number v-model="form.quantity" controls-position="right" @change="handleChange" :min="1" :max="form.quantity"></el-input-number>
+            </el-form-item>
+        </el-form>
+        <div slot="footer" class="dialog-footer">
+            <el-button @click="dialogFormVisible = false">取 消</el-button>
+            <el-button type="primary" @click="submit()">确 定</el-button>
+        </div>
+    </el-dialog>
+</div>
+</body>
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<script src="https://unpkg.com/element-ui@2.15.13/lib/index.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/element-ui@2.15.13/lib/theme-chalk/index.css">
+<script type="text/javascript" src="../../static/js/jquery.min.js"></script>
+<script src="../../static/js/axios-0.18.0.js"></script>
+<script type="text/javascript">
+    var Main = {
+        methods: {
+            //切换页码
+            handleCurrentChange(currentPage) {
+                this.pagination.currentPage = currentPage;
+                this.getAll();
+            },
+            handleChange(value) {
+                console.log(value);
+            },
+            getAll(){
+                var param = {
+                    currentPage:this.pagination.currentPage,
+                    pageSize:this.pagination.pageSize,
+                    queryString:this.pagination.queryString
+                };
+                //发送ajax请求
+                axios.post("/return/applications",param).then((res) => {
+                    this.tableData = res.data.data;
+                });
+                axios.get("/return/applications").then((res)=>{
+                    this.pagination.total = res.data;
+                });
+            },
+            submit(){
+                console.log(this.form);
+                axios.post("/return/application",this.form).then((res)=>{
+                    console.log(res.data.message);
+                });
+                this.dialogFormVisible = false;
+                this.getAll();
+            },
+            visiable(row){
+                this.dialogFormVisible = true;
+                console.log(row);
+                this.form=row;
+                this.getAll();
+            },
+            searchByName(){
+                if(this.search!=""){
+                    axios.get("/return/application/search/"+this.search).then((res)=>{
+                        alert(this.search)
+                        this.tableData = res.data.data;
+                        console.log(this.tableData)
+                    })
+                }else {
+                    this.getAll();
+                }
+
+            },
+        },
+        created(){
+            this.getAll();
+        },
+
+        data() {
+            return {
+                pagination: {//分页相关模型数据
+                    currentPage: 1,//当前页码
+                    pageSize: 5,//每页显示的记录数
+                    total: 0,//总记录数
+                    queryString:null//查询条件
+                },
+                tableData: [
+                    // {
+                    //     purchaseId: '51sda51',
+                    //     goodsId: '10010101',
+                    //     goodsName: '美汁源果粒橙',
+                    //     supplierName: '上海可口可乐有限公司',
+                    //     quantity: '10212',
+                    //     userName: '10001'
+                    // }
+                    ],
+                search: '',
+                dialogFormVisible: false,
+                form: {
+                    goodsId: '',
+                    goodsName: '',
+                    supplierName: '',
+                    quantity: '',
+                    delivery: false,
+                    type: [],
+                    resource: '',
+                    desc: '',
+                    num: '',
+                },
+                formLabelWidth: '120px'
+            }
+        }
+    }
+    var Ctor = Vue.extend(Main)
+    new Ctor().$mount('#app')
+</script>
+</html>
